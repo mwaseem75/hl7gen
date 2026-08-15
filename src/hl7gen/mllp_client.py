@@ -8,9 +8,12 @@ from __future__ import annotations
 
 import socket
 
+from hl7gen.normalize import normalize_er7
+
 
 def send_message(raw: str, host: str, port: int, timeout: float = 10.0) -> str:
     """Send an HL7 message and return the receiver's response (e.g. an ACK), if any."""
+    raw = normalize_er7(raw)
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.settimeout(timeout)
         sock.connect((host, port))

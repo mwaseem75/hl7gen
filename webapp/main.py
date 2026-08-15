@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from hl7gen.data import hl7_message_types
-from hl7gen.fhir_export import UnsupportedMessageTypeError, message_to_fhir
+from hl7gen.fhir_export import FHIR_VERSIONS, UnsupportedFhirVersionError, UnsupportedMessageTypeError, message_to_fhir
 from hl7gen.generator import generate_message
 from hl7gen.structure import get_structure
 from hl7gen.validator import validate_message
@@ -32,6 +32,7 @@ class ValidateRequest(BaseModel):
 
 class ToFhirRequest(BaseModel):
     message: str
+    fhir_version: str = "R5"
 
 
 @app.get("/api/types")
@@ -71,10 +72,17 @@ def api_validate(req: ValidateRequest):
     return {"valid": result.valid, "error": result.error}
 
 
+@app.get("/api/fhir-versions")
+def api_fhir_versions():
+    return [{"code": code, "label": label} for code, label in FHIR_VERSIONS.items()]
+
+
 @app.post("/api/to-fhir")
 def api_to_fhir(req: ToFhirRequest):
     try:
-        return message_to_fhir(req.message)
+        return message_to_fhir(req.message, fhir_version=req.fhir_version)
+    except UnsupportedFhirVersionError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
     except UnsupportedMessageTypeError as exc:
         raise HTTPException(status_code=422, detail=str(exc))
     except Exception as exc:

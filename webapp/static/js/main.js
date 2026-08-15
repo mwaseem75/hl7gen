@@ -27,6 +27,7 @@
   const typeSelect = document.getElementById('message-type');
   const structureTypeSelect = document.getElementById('structure-type');
   const versionSelect = document.getElementById('hl7-version');
+  const fhirVersionSelect = document.getElementById('fhir-version');
   const realisticCheckbox = document.getElementById('realistic');
   const messageBox = document.getElementById('message-box');
   const statusEl = document.getElementById('status');
@@ -37,6 +38,14 @@
   function setStatus(text, kind) {
     statusEl.textContent = text;
     statusEl.className = 'status' + (kind ? ' ' + kind : '');
+  }
+
+  // A <textarea>'s .value getter normalizes all line breaks to \n per the HTML spec,
+  // which corrupts HL7's literal \r segment separators the moment this box is read.
+  // The backend also normalizes defensively, but fixing it here keeps the message the
+  // user sees in the box consistent with what gets sent.
+  function messageText() {
+    return messageBox.value.replace(/\r\n|\n/g, '\r');
   }
 
   function populateSelect(select, items, valueKey, labelFn, preferredValue) {
@@ -55,12 +64,14 @@
   Promise.all([
     fetch('/api/types').then((r) => r.json()),
     fetch('/api/versions').then((r) => r.json()),
+    fetch('/api/fhir-versions').then((r) => r.json()),
   ])
-    .then(([types, versions]) => {
+    .then(([types, versions, fhirVersions]) => {
       const label = (t) => `${t.code} — ${t.description}`;
       populateSelect(typeSelect, types, 'code', label, 'ADT_A01');
       populateSelect(structureTypeSelect, types, 'code', label, 'ADT_A01');
       populateSelect(versionSelect, versions, null, (v) => v, '2.5');
+      populateSelect(fhirVersionSelect, fhirVersions, 'code', (v) => v.label, 'R5');
     })
     .catch(() => setStatus('Could not load message types/versions.', 'err'));
 
@@ -94,7 +105,7 @@
     fetch('/api/validate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: messageBox.value }),
+      body: JSON.stringify({ message: messageText() }),
     })
       .then((r) => r.json())
       .then((data) => {
@@ -112,7 +123,7 @@
     fetch('/api/to-fhir', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: messageBox.value }),
+      body: JSON.stringify({ message: messageText(), fhir_version: fhirVersionSelect.value }),
     })
       .then(async (r) => {
         const data = await r.json();
@@ -122,7 +133,7 @@
       .then((bundle) => {
         fhirOutput.textContent = JSON.stringify(bundle, null, 2);
         fhirSection.classList.remove('hidden');
-        setStatus('Converted to FHIR.', 'ok');
+        setStatus(`Converted to FHIR (${fhirVersionSelect.value}).`, 'ok');
       })
       .catch((err) => setStatus(err.message, 'err'));
   });

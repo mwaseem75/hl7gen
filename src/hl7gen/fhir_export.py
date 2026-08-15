@@ -4,19 +4,24 @@ See decisions/0003-fhir-coverage-scope.md: this intentionally covers common ADT/
 message types (Patient/Encounter/Observation), not all ~185 HL7 v2.5 message types.
 Unsupported types raise UnsupportedMessageTypeError rather than attempting a partial or
 silently-wrong conversion.
+
+See decisions/0010-fhir-version-selection.md: output can target FHIR R5 (the current
+release, and the default) or R4B (still the most widely deployed version in production
+EHR/interoperability systems). STU3 is not supported — its resource shapes diverge enough
+from R4B/R5 that supporting it properly would need separate mapping code, not just a
+different import path.
 """
 from __future__ import annotations
 
+from types import SimpleNamespace
 from typing import Optional
 
-from fhir.resources.address import Address
-from fhir.resources.bundle import Bundle, BundleEntry
-from fhir.resources.contactpoint import ContactPoint
-from fhir.resources.encounter import Encounter
-from fhir.resources.humanname import HumanName
-from fhir.resources.observation import Observation
-from fhir.resources.patient import Patient
 from hl7apy.parser import parse_message
+
+from hl7gen.normalize import normalize_er7
+
+# FHIR release -> human label. "R5" is the current FHIR release and the default.
+FHIR_VERSIONS = {"R5": "R5 (current)", "R4B": "R4B"}
 
 # Message types this module knows how to convert. Extend deliberately, with tests,
 # not by relaxing this check.
@@ -26,10 +31,42 @@ SUPPORTED_TYPES = {
 }
 
 _SEX_MAP = {"M": "male", "F": "female", "O": "other", "U": "unknown"}
+_ENCOUNTER_CLASS_MAP = {"I": "IMP", "O": "AMB", "E": "EMER"}
 
 
 class UnsupportedMessageTypeError(ValueError):
     pass
+
+
+class UnsupportedFhirVersionError(ValueError):
+    pass
+
+
+def _load_resources(fhir_version: str) -> SimpleNamespace:
+    if fhir_version not in FHIR_VERSIONS:
+        raise UnsupportedFhirVersionError(
+            f"{fhir_version!r} is not a supported FHIR version. Supported: {sorted(FHIR_VERSIONS)}"
+        )
+
+    # The top-level `fhir.resources.*` modules are the current release (R5); R4B lives
+    # under its own subpackage. Import lazily and per-call so each conversion is
+    # self-contained about which release's classes it used.
+    prefix = "" if fhir_version == "R5" else f"{fhir_version}."
+    import importlib
+
+    def load(module: str, name: str):
+        return getattr(importlib.import_module(f"fhir.resources.{prefix}{module}"), name)
+
+    return SimpleNamespace(
+        Address=load("address", "Address"),
+        Bundle=load("bundle", "Bundle"),
+        BundleEntry=load("bundle", "BundleEntry"),
+        ContactPoint=load("contactpoint", "ContactPoint"),
+        Encounter=load("encounter", "Encounter"),
+        HumanName=load("humanname", "HumanName"),
+        Observation=load("observation", "Observation"),
+        Patient=load("patient", "Patient"),
+    )
 
 
 def _field(segment, field_name: str) -> str:
@@ -42,7 +79,7 @@ def _hl7_date_to_fhir(value: str) -> Optional[str]:
     return f"{value[0:4]}-{value[4:6]}-{value[6:8]}"
 
 
-def _patient_from_pid(pid) -> Patient:
+def _patient_from_pid(pid, R) -> "R.Patient":
     name_raw = _field(pid, "pid_5")
     family, given = "", []
     if name_raw:
@@ -54,18 +91,18 @@ def _patient_from_pid(pid) -> Patient:
     address = None
     if address_raw:
         parts = address_raw.split("^")
-        address = Address(
+        address = R.Address(
             line=[parts[0]] if parts and parts[0] else None,
             city=parts[1] if len(parts) > 1 and parts[1] else None,
             state=parts[2] if len(parts) > 2 and parts[2] else None,
         )
 
     phone_raw = _field(pid, "pid_13")
-    telecom = [ContactPoint(system="phone", value=phone_raw)] if phone_raw else None
+    telecom = [R.ContactPoint(system="phone", value=phone_raw)] if phone_raw else None
 
-    return Patient(
+    return R.Patient(
         identifier=None,
-        name=[HumanName(family=family or None, given=given or None)] if (family or given) else None,
+        name=[R.HumanName(family=family or None, given=given or None)] if (family or given) else None,
         birthDate=_hl7_date_to_fhir(_field(pid, "pid_7")),
         gender=_SEX_MAP.get(_field(pid, "pid_8"), None),
         address=[address] if address else None,
@@ -73,15 +110,17 @@ def _patient_from_pid(pid) -> Patient:
     )
 
 
-def _encounter_from_pv1(pv1) -> Optional[Encounter]:
+def _encounter_from_pv1(pv1, R, fhir_version: str):
     if not hasattr(pv1, "pv1_2"):
         return None
-    patient_class = _field(pv1, "pv1_2")
-    class_map = {"I": "IMP", "O": "AMB", "E": "EMER"}
-    return Encounter(
-        status="unknown",
-        class_fhir=[{"coding": [{"code": class_map.get(patient_class, "AMB")}]}],
-    )
+    code = _ENCOUNTER_CLASS_MAP.get(_field(pv1, "pv1_2"), "AMB")
+
+    if fhir_version == "R4B":
+        # R4B's Encounter.class is a single required Coding, not a list.
+        return R.Encounter(status="unknown", class_fhir={"code": code})
+
+    # R5 changed Encounter.class to a list of CodeableConcept.
+    return R.Encounter(status="unknown", class_fhir=[{"coding": [{"code": code}]}])
 
 
 def _find_segments(node, name: str) -> list:
@@ -100,7 +139,7 @@ def _find_segments(node, name: str) -> list:
     return found
 
 
-def _observations_from_obx(message) -> list[Observation]:
+def _observations_from_obx(message, R) -> list:
     observations = []
     for child in _find_segments(message, "OBX"):
         value_type = _field(child, "obx_2")
@@ -124,16 +163,20 @@ def _observations_from_obx(message) -> list[Observation]:
                 obs_kwargs["valueString"] = value
         else:
             obs_kwargs["valueString"] = value
-        observations.append(Observation(**obs_kwargs))
+        observations.append(R.Observation(**obs_kwargs))
     return observations
 
 
-def message_to_fhir(raw: str) -> dict:
+def message_to_fhir(raw: str, fhir_version: str = "R5") -> dict:
     """Convert an HL7 v2 ER7 message to a FHIR Bundle (as a plain dict, JSON-ready).
 
-    Raises UnsupportedMessageTypeError for message types outside SUPPORTED_TYPES.
+    fhir_version selects the target FHIR release — "R5" (current, default) or "R4B".
+    Raises UnsupportedMessageTypeError for HL7 message types outside SUPPORTED_TYPES, and
+    UnsupportedFhirVersionError for an unsupported fhir_version.
     """
-    message = parse_message(raw)
+    R = _load_resources(fhir_version)
+
+    message = parse_message(normalize_er7(raw))
     msg_type = message.msh.msh_9.msg_3.to_er7() if hasattr(message.msh.msh_9, "msg_3") else ""
     if msg_type not in SUPPORTED_TYPES:
         raise UnsupportedMessageTypeError(
@@ -144,16 +187,16 @@ def message_to_fhir(raw: str) -> dict:
     resources = []
     pid_segments = _find_segments(message, "PID")
     if pid_segments:
-        resources.append(_patient_from_pid(pid_segments[0]))
+        resources.append(_patient_from_pid(pid_segments[0], R))
     pv1_segments = _find_segments(message, "PV1")
     if pv1_segments:
-        encounter = _encounter_from_pv1(pv1_segments[0])
+        encounter = _encounter_from_pv1(pv1_segments[0], R, fhir_version)
         if encounter:
             resources.append(encounter)
-    resources.extend(_observations_from_obx(message))
+    resources.extend(_observations_from_obx(message, R))
 
-    bundle = Bundle(
+    bundle = R.Bundle(
         type="collection",
-        entry=[BundleEntry(resource=r) for r in resources],
+        entry=[R.BundleEntry(resource=r) for r in resources],
     )
     return bundle.model_dump(exclude_none=True, by_alias=True)

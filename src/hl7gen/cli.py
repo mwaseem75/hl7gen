@@ -7,7 +7,7 @@ from pathlib import Path
 import click
 
 from hl7gen.data import hl7_message_types
-from hl7gen.fhir_export import UnsupportedMessageTypeError, message_to_fhir
+from hl7gen.fhir_export import FHIR_VERSIONS, UnsupportedMessageTypeError, message_to_fhir
 from hl7gen.generator import generate_messages
 from hl7gen.mllp_client import send_message, test_connection
 from hl7gen.structure import get_structure
@@ -91,12 +91,14 @@ def check_connection(host, port):
 
 @cli.command("to-fhir")
 @click.argument("file", type=click.Path(exists=True, dir_okay=False))
+@click.option("--fhir-version", type=click.Choice(sorted(FHIR_VERSIONS)), default="R5",
+              show_default=True, help="Target FHIR release.")
 @click.option("--out", "out_file", type=click.Path(), default=None,
               help="File to write the FHIR Bundle JSON to. Prints to stdout if omitted.")
-def to_fhir(file, out_file):
+def to_fhir(file, fhir_version, out_file):
     """Convert an HL7 v2 message from FILE to a FHIR Bundle."""
     try:
-        bundle = message_to_fhir(_read_hl7(file))
+        bundle = message_to_fhir(_read_hl7(file), fhir_version=fhir_version)
     except UnsupportedMessageTypeError as exc:
         raise click.ClickException(str(exc))
 
