@@ -8,40 +8,86 @@
   <link rel="stylesheet" href="/static/css/style.css" />
 </head>
 <body>
+  <nav class="topnav">
+    <div class="container topnav-inner">
+      <span class="brand">
+        <svg viewBox="0 0 24 24" class="brand-icon" aria-hidden="true"><path d="M3 12h4l2-7 4 14 2-7h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        hl7gen
+      </span>
+      <div class="topnav-links">
+        <a href="#generate">Generate</a>
+        <a href="#structure">Structure</a>
+        <a href="https://github.com/mwaseem75/hl7gen" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle color theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z" fill="currentColor"/></svg>
+          <svg class="icon-auto" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3a9 9 0 0 0 0 18Z" fill="currentColor"/></svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
   <header class="hero">
     <div class="container">
-      <p class="eyebrow">$ hl7gen</p>
-      <h1>hl7gen playground</h1>
+      <p class="eyebrow">synthetic HL7 v2 test data, no vendor lock-in</p>
+      <h1>Generate HL7 you can actually <span class="accent-text">trust</span>.</h1>
       <p class="tagline">
-        Generate, validate, and convert synthetic HL7 v2 test messages — right here,
-        no install required. <code>pip install hl7gen</code> when you want the CLI.
+        Generate, validate, and convert HL7 v2 messages for any receiver — right here in
+        your browser. Want the CLI? <code>pip install hl7gen</code>
       </p>
     </div>
   </header>
 
   <main class="container">
-    <section id="generate">
-      <h2><span class="prompt">#</span> Generate</h2>
+    <section id="generate" class="card">
+      <h2><svg class="h-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M3 12h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Generate &amp; validate</h2>
       <div class="controls">
-        <select id="message-type"></select>
+        <div class="field">
+          <label for="message-type">Message type</label>
+          <select id="message-type"></select>
+        </div>
+        <div class="field">
+          <label for="hl7-version">HL7 version</label>
+          <select id="hl7-version"></select>
+        </div>
         <label class="checkbox">
           <input type="checkbox" id="realistic" />
-          realistic (AI, if server has a key)
+          <span>realistic (AI, if server has a key)</span>
         </label>
-        <button id="generate-btn">Generate</button>
+        <button id="generate-btn" class="btn btn-primary">Generate</button>
       </div>
       <textarea id="message-box" rows="10" spellcheck="false"
         placeholder="Generated HL7 message will appear here. You can also paste your own."></textarea>
       <div class="controls">
-        <button id="validate-btn">Validate</button>
-        <button id="fhir-btn">Convert to FHIR</button>
+        <button id="validate-btn" class="btn">Validate</button>
+        <button id="fhir-btn" class="btn">Convert to FHIR</button>
       </div>
       <p id="status" class="status"></p>
     </section>
 
-    <section id="fhir-output-section" class="hidden">
-      <h2><span class="prompt">#</span> FHIR Bundle</h2>
+    <section id="fhir-output-section" class="card hidden">
+      <h2><svg class="h-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 9h8M8 13h8M8 17h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>FHIR bundle</h2>
       <pre id="fhir-output"></pre>
+    </section>
+
+    <section id="structure" class="card">
+      <h2><svg class="h-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h6v6H4zM14 5h6v6h-6zM4 15h6v4H4zM14 15h6v4h-6z" fill="none" stroke="currentColor" stroke-width="2"/></svg>Structure explorer</h2>
+      <p class="section-hint">
+        See exactly what a message type contains before you generate it.
+        <span class="legend">
+          <span class="legend-item"><span class="swatch swatch-required"></span>required</span>
+          <span class="legend-item"><span class="swatch swatch-optional"></span>optional</span>
+          <span class="legend-item"><span class="pill pill-repeat">×N</span>repeating</span>
+        </span>
+      </p>
+      <div class="controls">
+        <div class="field">
+          <label for="structure-type">Message type</label>
+          <select id="structure-type"></select>
+        </div>
+        <button id="structure-btn" class="btn btn-primary">Explore</button>
+      </div>
+      <div id="structure-tree" class="structure-tree"></div>
     </section>
   </main>
 

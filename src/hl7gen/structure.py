@@ -3,6 +3,11 @@
 Rebuilt from GetHL7Structure/GetSegmentDetails in the original iris-HL7v2Gen, which built
 an HTML <ul>/<li> tree string for a CSP page. This produces a plain nested-dict tree instead,
 reused by both the CLI (`hl7gen structure`) and the web API — no markup baked into the data.
+
+Each node carries `required` (cardinality min >= 1) and `repeating` (cardinality max != 1,
+i.e. hl7apy's -1/"unbounded" or an explicit max > 1) so callers (the web playground's
+structure explorer) can visually distinguish required/optional and single/repeating
+segments, groups, and fields — not just list names.
 """
 from __future__ import annotations
 
@@ -11,7 +16,12 @@ from hl7apy.core import Message
 from hl7gen.data import hl7_segment_names
 
 
-def _describe_field(name: str, field_def: tuple) -> dict:
+def _card_flags(cardinality: tuple) -> dict:
+    minimum, maximum = cardinality[0], cardinality[1]
+    return {"required": minimum >= 1, "repeating": maximum != 1}
+
+
+def _describe_field(name: str, field_def: tuple, cardinality: tuple) -> dict:
     struct_type, sub_elements, datatype, description = field_def[0], field_def[1], field_def[2], field_def[3]
     table_id = field_def[4] if len(field_def) > 4 else None
 
@@ -20,11 +30,12 @@ def _describe_field(name: str, field_def: tuple) -> dict:
         "description": description.replace("_", " ").title() if description else None,
         "datatype": datatype,
         "table": table_id,
+        **_card_flags(cardinality),
     }
     if struct_type == "sequence" and sub_elements:
         node["components"] = [
-            _describe_field(sub_name, sub_def)
-            for sub_name, sub_def, _card, _type in sub_elements
+            _describe_field(sub_name, sub_def, sub_card)
+            for sub_name, sub_def, sub_card, _type in sub_elements
         ]
     return node
 
@@ -35,8 +46,8 @@ def _describe_segment(seg_name: str, definition: tuple, cardinality: tuple) -> d
         "type": "segment",
         "name": seg_name,
         "description": hl7_segment_names.get(seg_name, ""),
-        "required": cardinality[0] >= 1,
-        "fields": [_describe_field(name, fdef) for name, fdef, _card, _ftype in fields],
+        **_card_flags(cardinality),
+        "fields": [_describe_field(name, fdef, fcard) for name, fdef, fcard, _ftype in fields],
     }
 
 
@@ -45,7 +56,7 @@ def _describe_group(group_name: str, definition: tuple, cardinality: tuple, msg_
     return {
         "type": "group",
         "name": group_name.replace(msg_type, "").lstrip("_") or group_name,
-        "required": cardinality[0] >= 1,
+        **_card_flags(cardinality),
         "children": [_describe_element(el, msg_type) for el in children],
     }
 

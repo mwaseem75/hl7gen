@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import hl7apy as hl7apy_root
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -36,6 +37,15 @@ class ToFhirRequest(BaseModel):
 @app.get("/api/types")
 def api_types():
     return [{"code": code, "description": desc} for code, desc in sorted(hl7_message_types.items())]
+
+
+def _version_sort_key(v: str):
+    return [int(part) if part.isdigit() else part for part in v.split(".")]
+
+
+@app.get("/api/versions")
+def api_versions():
+    return sorted(hl7apy_root.SUPPORTED_LIBRARIES.keys(), key=_version_sort_key)
 
 
 @app.get("/api/structure/{message_type}")
