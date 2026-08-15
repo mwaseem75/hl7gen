@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hl7gen playground</title>
+  <meta name="description" content="Generate, validate, and convert synthetic HL7 v2 test messages in your browser." />
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="container">
+      <p class="eyebrow">$ hl7gen</p>
+      <h1>hl7gen playground</h1>
+      <p class="tagline">
+        Generate, validate, and convert synthetic HL7 v2 test messages — right here,
+        no install required. <code>pip install hl7gen</code> when you want the CLI.
+      </p>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="generate">
+      <h2><span class="prompt">#</span> Generate</h2>
+      <div class="controls">
+        <select id="message-type"></select>
+        <label class="checkbox">
+          <input type="checkbox" id="realistic" />
+          realistic (AI, if server has a key)
+        </label>
+        <button id="generate-btn">Generate</button>
+      </div>
+      <textarea id="message-box" rows="10" spellcheck="false"
+        placeholder="Generated HL7 message will appear here. You can also paste your own."></textarea>
+      <div class="controls">
+        <button id="validate-btn">Validate</button>
+        <button id="fhir-btn">Convert to FHIR</button>
+      </div>
+      <p id="status" class="status"></p>
+    </section>
+
+    <section id="fhir-output-section" class="hidden">
+      <h2><span class="prompt">#</span> FHIR Bundle</h2>
+      <pre id="fhir-output"></pre>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>hl7gen — MIT licensed. <a href="https://github.com/mwaseem75/hl7gen" target="_blank" rel="noopener noreferrer">Source on GitHub</a></p>
+    </div>
+  </footer>
+
+  <script src="/static/js/main.js"></script>
+</body>
+</html>

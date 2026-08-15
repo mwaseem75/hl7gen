@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hl7gen"
+version = "0.1.0"
+description = "Generate, validate, and convert synthetic HL7 v2 test data — no vendor lock-in."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.9"
+authors = [{ name = "mwaseem75" }]
+dependencies = [
+    "hl7apy>=1.3.4",
+    "Faker>=20.0.0",
+    "fhir.resources>=8.0.0",
+    "click>=8.1.0",
+    "fastapi>=0.110.0",
+    "uvicorn>=0.29.0",
+]
+
+[project.optional-dependencies]
+ai = ["anthropic>=0.30.0"]
+dev = ["pytest>=8.0.0", "httpx>=0.27.0"]
+
+[project.scripts]
+hl7gen = "hl7gen.cli:cli"
+
+[tool.setuptools.packages.find]
+where = ["src"]

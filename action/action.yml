@@ -1,0 +1,54 @@
+name: "hl7gen"
+description: "Generate synthetic HL7 v2 test messages in your CI pipeline."
+branding:
+  icon: "activity"
+  color: "blue"
+
+inputs:
+  message-type:
+    description: "HL7 message type to generate, e.g. ADT_A01"
+    required: true
+  version:
+    description: "HL7 version"
+    required: false
+    default: "2.5"
+  count:
+    description: "Number of messages to generate"
+    required: false
+    default: "1"
+  realistic:
+    description: "Use AI-realistic patient data (requires ANTHROPIC_API_KEY secret)"
+    required: false
+    default: "false"
+  out-dir:
+    description: "Directory to write generated .hl7 files to"
+    required: false
+    default: "hl7gen-output"
+
+outputs:
+  out-dir:
+    description: "Directory containing the generated .hl7 files"
+    value: ${{ inputs.out-dir }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+
+    - name: Install hl7gen
+      shell: bash
+      run: pip install hl7gen
+
+    - name: Generate HL7 messages
+      shell: bash
+      env:
+        ANTHROPIC_API_KEY: ${{ env.ANTHROPIC_API_KEY }}
+      run: |
+        ARGS="generate ${{ inputs.message-type }} --version ${{ inputs.version }} --count ${{ inputs.count }} --out ${{ inputs.out-dir }}"
+        if [ "${{ inputs.realistic }}" = "true" ]; then
+          ARGS="$ARGS --realistic"
+        fi
+        hl7gen $ARGS
