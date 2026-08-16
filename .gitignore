@@ -10,6 +10,7 @@ build/
 *.log
 node_modules/
 *.mcpb
+uv.lock
 
 # Local context-tracking files (agent/session notes) — intentionally not published.
 tasks.md

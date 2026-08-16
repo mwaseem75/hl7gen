@@ -1,0 +1,14 @@
+{
+  "name": "hl7gen-marketplace",
+  "description": "hl7gen: generate, validate, and convert synthetic HL7 v2 test data — no vendor lock-in.",
+  "owner": {
+    "name": "mwaseem75",
+    "url": "https://github.com/mwaseem75/hl7gen"
+  },
+  "plugins": [
+    {
+      "name": "hl7gen",
+      "source": "./"
+    }
+  ]
+}

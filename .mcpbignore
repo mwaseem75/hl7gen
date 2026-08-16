@@ -11,6 +11,8 @@ build/
 *.egg-info/
 __pycache__/
 .pytest_cache/
+.venv/
+uv.lock
 
 # Everything that isn't the MCP server itself.
 webapp/
@@ -21,6 +23,9 @@ Dockerfile
 render.yaml
 .mcp.json
 .github/
+.claude-plugin/
+SKILL.md
+hl7gen.mcpb
 
 # Only src/hl7gen/*.py is actually needed at runtime.
 src/hl7gen.egg-info/

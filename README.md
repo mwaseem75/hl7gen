@@ -90,8 +90,22 @@ server available automatically. For other clients, point them at the `hl7gen-mcp
 what's deliberately not (message sending — a side-effecting operation), and why.
 
 Also published as an [MCPB bundle](https://github.com/modelcontextprotocol/mcpb) for
-one-click install in compatible hosts (built via `mcpb pack`, requires `hl7gen[mcp]` to
-already be installed — see `decisions/0014-mcpb-bundle-for-smithery.md`).
+one-click install in compatible hosts — download `hl7gen.mcpb` from the
+[latest release](https://github.com/mwaseem75/hl7gen/releases/latest). It uses the `uv`
+runtime type, so dependencies install automatically at first run — no separate `pip install`
+needed. See `decisions/0014-mcpb-bundle-for-smithery.md`.
+
+### Claude Code plugin
+
+```
+/plugin marketplace add mwaseem75/hl7gen
+/plugin install hl7gen@hl7gen-marketplace
+```
+
+Bundles the MCP server above with a skill (`SKILL.md`) that teaches Claude when to reach
+for hl7gen and flags real gotchas discovered while building it (like HL7's `\r` segment
+separator getting silently mangled by naive text handling). See
+`decisions/0015-skill-and-plugin.md`.
 
 ## FHIR conversion coverage
 

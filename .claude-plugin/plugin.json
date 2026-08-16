@@ -1,0 +1,21 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "hl7gen",
+  "version": "0.1.0",
+  "description": "Generate, validate, and convert synthetic HL7 v2 test data — no vendor lock-in. Bundles the hl7gen MCP server and a skill covering HL7 v2 generation, validation, and FHIR conversion.",
+  "author": {
+    "name": "mwaseem75",
+    "url": "https://github.com/mwaseem75/hl7gen"
+  },
+  "homepage": "https://github.com/mwaseem75/hl7gen",
+  "license": "MIT",
+  "skills": [
+    "./"
+  ],
+  "mcpServers": {
+    "hl7gen": {
+      "command": "python",
+      "args": ["-m", "hl7gen.mcp_server"]
+    }
+  }
+}
