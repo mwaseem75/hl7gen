@@ -38,6 +38,9 @@ can convert common message types straight to FHIR.
 - **Web playground** — try it in the browser with no install (`docker compose up`, see
   below).
 - **GitHub Action** — generate test HL7 data directly in CI (see `action/action.yml`).
+- 
+## App Layout
+<img width="524"  alt="image" src="https://github.com/user-attachments/assets/d706bdeb-ba30-46f8-9751-8ee5f074616c" />
 
 ## CLI
 
