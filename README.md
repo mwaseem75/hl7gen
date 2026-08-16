@@ -23,6 +23,38 @@ surprisingly little good open tooling for that outside of expensive commercial e
 HL7 v2.5 messages for any of ~185 message types, validates messages you already have, and
 can convert common message types straight to FHIR.
 
+## Demo
+
+```console
+$ hl7gen generate ADT_A01 --out demo-out
+Wrote demo-out/ADT_A01_1.hl7
+
+$ head -c 180 demo-out/ADT_A01_1.hl7
+MSH|^~\&|0FH4X5RF^WV4ACSOK^HCD|RW3B2KC7^CI4YOCBC^HCD|3IAHLZ8G^WJUAL9DT^Random|0VOI1TEB^CQO9N5A8^ISO|20070421035225^L|EHDY4XWH|ADT^A01^ADT_A01|IK2IMSPU|P^I|2.5|488.38|B9COA8ZR|NE|AL
+
+$ hl7gen validate demo-out/ADT_A01_1.hl7
+Valid HL7 message.
+
+$ hl7gen to-fhir demo-out/ADT_A01_1.hl7
+{
+  "resourceType": "Bundle",
+  "type": "collection",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "name": [{ "family": "QLMPEPPZ", "given": ["ZTJ5ROEJ", "BN81RG9V"] }]
+      }
+    }
+  ]
+}
+
+$ hl7gen types | head -3
+ACK          Acknowledgement
+ADR_A19      Patient query
+ADT_A01      Admit/Visit Notification
+```
+
 ## Features
 
 - **Generate** — synthetic HL7 v2.5 messages for any standard message type (`ADT_A01`,
