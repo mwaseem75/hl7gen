@@ -124,7 +124,8 @@ rather than producing a partial or silently wrong conversion — see
     out-dir: test-data/hl7
 ```
 
-(Requires `hl7gen` to be published to PyPI — see `tasks.md`, Phase B.)
+Lives in its own repo: [mwaseem75/hl7gen-action](https://github.com/mwaseem75/hl7gen-action)
+— see there for full docs (inputs/outputs, example workflow).
 
 ## Project layout
 
