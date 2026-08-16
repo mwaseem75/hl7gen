@@ -15,3 +15,4 @@ uv.lock
 # Local context-tracking files (agent/session notes) — intentionally not published.
 tasks.md
 decisions/
+launch-posts.md
