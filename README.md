@@ -41,6 +41,9 @@ can convert common message types straight to FHIR.
 - **MCP server** — expose generate/validate/convert as tools any MCP client (Claude
   Desktop, Claude Code, etc.) can call directly. See [MCP server](#mcp-server) below.
 
+## App Layout
+<img width="524" alt="image" src="https://github.com/user-attachments/assets/d706bdeb-ba30-46f8-9751-8ee5f074616c" />
+
 ## CLI
 
 ```bash
