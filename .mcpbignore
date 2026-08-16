@@ -1,0 +1,26 @@
+# Only the MCP server needs to ship in this bundle — not the whole repo.
+# (mcpb pack has no include-list mode, only exclude, so this is deliberately broad.)
+
+# Local session-tracking files — never published anywhere (see decisions/0013, git history).
+tasks.md
+decisions/
+
+# Build/cache artifacts.
+dist/
+build/
+*.egg-info/
+__pycache__/
+.pytest_cache/
+
+# Everything that isn't the MCP server itself.
+webapp/
+action/
+tests/
+docker-compose.yml
+Dockerfile
+render.yaml
+.mcp.json
+.github/
+
+# Only src/hl7gen/*.py is actually needed at runtime.
+src/hl7gen.egg-info/

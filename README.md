@@ -88,6 +88,10 @@ server available automatically. For other clients, point them at the `hl7gen-mcp
 (installed by the `mcp` extra above). See `decisions/0013-mcp-server.md` for what's exposed,
 what's deliberately not (message sending — a side-effecting operation), and why.
 
+Also published as an [MCPB bundle](https://github.com/modelcontextprotocol/mcpb) for
+one-click install in compatible hosts (built via `mcpb pack`, requires `hl7gen[mcp]` to
+already be installed — see `decisions/0014-mcpb-bundle-for-smithery.md`).
+
 ## FHIR conversion coverage
 
 `hl7gen to-fhir` currently supports: `ADT_A01`, `ADT_A02`, `ADT_A03`, `ADT_A04`, `ADT_A05`,

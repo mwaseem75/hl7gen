@@ -1,0 +1,26 @@
+{
+  "manifest_version": "0.2",
+  "name": "hl7gen",
+  "version": "0.1.0",
+  "description": "Generate, validate, and convert synthetic HL7 v2 test data — no vendor lock-in.",
+  "author": {
+    "name": "mwaseem75",
+    "url": "https://github.com/mwaseem75/hl7gen"
+  },
+  "server": {
+    "type": "python",
+    "entry_point": "src/hl7gen/mcp_server.py",
+    "mcp_config": {
+      "command": "python",
+      "args": ["-m", "hl7gen.mcp_server"],
+      "env": {}
+    }
+  },
+  "compatibility": {
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": {
+      "python": ">=3.9"
+    }
+  },
+  "license": "MIT"
+}

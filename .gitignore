@@ -9,6 +9,7 @@ build/
 .env
 *.log
 node_modules/
+*.mcpb
 
 # Local context-tracking files (agent/session notes) — intentionally not published.
 tasks.md
