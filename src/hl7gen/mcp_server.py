@@ -20,7 +20,7 @@ from hl7gen.generator import generate_message
 from hl7gen.structure import get_structure
 from hl7gen.validator import validate_message
 
-mcp = MCPServer(name="hl7gen", version="0.1.0")
+mcp = MCPServer(name="hl7gen", version="0.2.0")
 
 
 @mcp.tool()

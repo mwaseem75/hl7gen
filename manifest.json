@@ -1,7 +1,7 @@
 {
   "manifest_version": "0.4",
   "name": "hl7gen",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Generate, validate, and convert synthetic HL7 v2 test data — no vendor lock-in.",
   "author": {
     "name": "mwaseem75",
