@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: hl7gen-playground
+    runtime: docker
+    dockerfilePath: ./webapp/Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: ANTHROPIC_API_KEY
+        sync: false

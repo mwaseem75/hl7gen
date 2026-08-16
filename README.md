@@ -1,5 +1,8 @@
 # hl7gen
 
+[![PyPI](https://img.shields.io/pypi/v/hl7gen)](https://pypi.org/project/hl7gen/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 Generate, validate, and convert synthetic HL7 v2 test data — for any HL7 v2 system, with
 no vendor lock-in.
 
@@ -50,6 +53,8 @@ hl7gen structure ADT_A01                              # JSON structure tree
 
 ## Web playground
 
+Run locally:
+
 ```bash
 docker compose up --build
 ```
@@ -57,6 +62,10 @@ docker compose up --build
 Open http://localhost:8000 — generate, validate, and convert messages entirely in the
 browser. Set `ANTHROPIC_API_KEY` in your environment before `docker compose up` to enable
 the realistic-data option there too.
+
+**Deploy your own copy to Render:** connect this repo on [Render](https://dashboard.render.com)
+via **New +** → **Blueprint** — it picks up `render.yaml` and deploys `webapp/Dockerfile`
+automatically (free tier). See `decisions/0011-render-for-public-playground.md`.
 
 ## FHIR conversion coverage
 
