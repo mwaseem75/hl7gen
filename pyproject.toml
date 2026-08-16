@@ -21,10 +21,15 @@ dependencies = [
 
 [project.optional-dependencies]
 ai = ["anthropic>=0.30.0"]
-dev = ["pytest>=8.0.0", "httpx>=0.27.0"]
+mcp = ["mcp>=2.0.0"]
+dev = ["pytest>=8.0.0", "pytest-asyncio>=0.24.0", "httpx>=0.27.0", "mcp>=2.0.0"]
 
 [project.scripts]
 hl7gen = "hl7gen.cli:cli"
+hl7gen-mcp = "hl7gen.mcp_server:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"

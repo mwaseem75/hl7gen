@@ -38,6 +38,8 @@ can convert common message types straight to FHIR.
 - **Web playground** — try it in the browser with no install (`docker compose up`, see
   below).
 - **GitHub Action** — generate test HL7 data directly in CI (see `action/action.yml`).
+- **MCP server** — expose generate/validate/convert as tools any MCP client (Claude
+  Desktop, Claude Code, etc.) can call directly. See [MCP server](#mcp-server) below.
 
 ## CLI
 
@@ -66,6 +68,22 @@ the realistic-data option there too.
 **Deploy your own copy to Render:** connect this repo on [Render](https://dashboard.render.com)
 via **New +** → **Blueprint** — it picks up `render.yaml` and deploys `webapp/Dockerfile`
 automatically (free tier). See `decisions/0011-render-for-public-playground.md`.
+
+## MCP server
+
+```bash
+pip install "hl7gen[mcp]"
+```
+
+Exposes 5 tools over the [Model Context Protocol](https://modelcontextprotocol.io):
+`generate_hl7_message`, `validate_hl7_message`, `hl7_to_fhir`, `get_hl7_structure`,
+`list_hl7_message_types`. It runs locally over stdio — an MCP client launches
+`hl7gen-mcp` as a subprocess, no network or Docker involved.
+
+For Claude Code: this repo ships a `.mcp.json`, so opening it in Claude Code makes the
+server available automatically. For other clients, point them at the `hl7gen-mcp` command
+(installed by the `mcp` extra above). See `decisions/0013-mcp-server.md` for what's exposed,
+what's deliberately not (message sending — a side-effecting operation), and why.
 
 ## FHIR conversion coverage
 

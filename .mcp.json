@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "hl7gen": {
+      "command": "python",
+      "args": ["-m", "hl7gen.mcp_server"]
+    }
+  }
+}
