@@ -1,5 +1,6 @@
 # hl7gen
 
+[![Tests](https://github.com/mwaseem75/hl7gen/actions/workflows/test.yml/badge.svg)](https://github.com/mwaseem75/hl7gen/actions/workflows/test.yml)
 [![PyPI](https://img.shields.io/pypi/v/hl7gen)](https://pypi.org/project/hl7gen/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Smithery](https://img.shields.io/badge/Smithery-mwaseem75%2Fhl7gen-blue)](https://smithery.ai/servers/mwaseem75/hl7gen)
