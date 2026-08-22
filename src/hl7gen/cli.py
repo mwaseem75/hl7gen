@@ -73,9 +73,11 @@ def validate(file):
 @click.argument("file", type=click.Path(exists=True, dir_okay=False))
 @click.option("--host", required=True)
 @click.option("--port", required=True, type=int)
-def send(file, host, port):
-    """Send an HL7 message from FILE to HOST:PORT over TCP/IP."""
-    response = send_message(_read_hl7(file), host, port)
+@click.option("--no-frame", "mllp_framing", flag_value=False, default=True,
+              help="Send the raw message without MLLP framing (custom listeners only).")
+def send(file, host, port, mllp_framing):
+    """Send an HL7 message from FILE to HOST:PORT over MLLP."""
+    response = send_message(_read_hl7(file), host, port, mllp_framing=mllp_framing)
     click.echo(response or "(no response received)")
 
 
